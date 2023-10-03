@@ -28,9 +28,7 @@ public class BoardService {
     public Board getBoard(int boardId) {
         //id에 해당하는 게시물을 읽어들인다.
         //id에 해당하는 게시물의 조회수도 1증가.
-        Board board=boardDao.getBoard(boardId);
-        boardDao.updateViewCnt(boardId);
-        return board;
+        return getBoard(boardId,true);
     }
     @Transactional
     public void deleteBoard(int userId, int boardId) {
@@ -38,5 +36,22 @@ public class BoardService {
         if(board.getBoardId()==userId){
             boardDao.deleteBoard(boardId);
         }
+    }
+    @Transactional
+    public void deleteBoard( int boardId) {
+        boardDao.deleteBoard(boardId);
+    }
+    //updateViewCnt가 true면 글의 조회수를 증가,false면 글의 조회수를 증가하지 않도록.
+    @Transactional
+    public Board getBoard(int boardId,boolean updateViewCnt){
+        Board board=boardDao.getBoard(boardId);
+        if(updateViewCnt){
+            boardDao.updateViewCnt(boardId);
+        }
+        return board;
+    }
+    @Transactional
+    public void updateBoard(int boardId, String title, String content) {
+        boardDao.updateBoard(boardId,title,content);
     }
 }

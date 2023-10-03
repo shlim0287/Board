@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -75,12 +76,18 @@ public class UserController {
             if(user.getPassword().equals(password)){
                 System.out.println("암호가 같음");
                 LoginInfo loginInfo=new LoginInfo(user.getUserId(),user.getEmail(),user.getName());
+
+                //권한정보 읽어들여 loginInfo에 추가
+                List<String> roles=userService.getRoles(user.getUserId());
+                loginInfo.setRoles(roles);
+
                 httpSession.setAttribute("loginInfo",loginInfo);//첫번째 파라미터가 key,두번째 파라미터가 값.
                 System.out.println("세션에 로그인 정보 저장");
             }else {
                 throw new RuntimeException("암호가 같지 않음");
             }
         }catch (Exception e){
+            e.printStackTrace();
             return "redirect:/loginform?error=true"; //email에 해당하는 정보 없으면 로그인 폼으로 이동
         }
 

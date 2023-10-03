@@ -70,7 +70,7 @@ public class BoardController {
     public String writeForm(HttpSession session,Model model){
         LoginInfo loginInfo=(LoginInfo) session.getAttribute("loginInfo");
         if(loginInfo ==null){//세션에 로그인 정보가 없으면 /loginform으로 리다이렉트
-            return "redirectL/loginform";
+            return "redirect:/loginform";
         }
         model.addAttribute("loginInfo",loginInfo);
         return "writeForm";
@@ -86,7 +86,7 @@ public class BoardController {
         //세션에서 로그인한 정보를 읽어들인다.
         LoginInfo loginInfo=(LoginInfo) session.getAttribute("loginInfo");
         if(loginInfo ==null){//세션에 로그인 정보가 없으면 /loginform으로 리다이렉트
-            return "redirectL/loginform";
+            return "redirect:/loginform";
         }
         //로그인한 회원정보+ 제목, 내용을 저장한다.
         System.out.println(title);
@@ -102,9 +102,46 @@ public class BoardController {
         if(loginInfo==null){
             return "redirect:/loginform";
         }
-        boardService.deleteBoard(loginInfo.getUserId(),boardId);
 
+        List<String> roles=loginInfo.getRoles();
+        //권한이 있으면 삭제가능
+        if(roles.contains("ROLE_ADMIN")){
+            boardService.deleteBoard(boardId);
+        }else{
+            boardService.deleteBoard(loginInfo.getUserId(),boardId);
+        }
         return "redirect:/";
-
+    }
+    @GetMapping("/updateform")
+    public String updateform(@RequestParam("boardId")int boardId,Model model,HttpSession session){
+        LoginInfo loginInfo=(LoginInfo) session.getAttribute("loginInfo");
+        if(loginInfo ==null){//세션에 로그인 정보가 없으면 /loginform으로 리다이렉트
+            return "redirect:/loginform";
+        }
+        //boardId에 해당하는 정보를 읽어와서 updateform 템플릿에게 전달한다.
+        Board board=boardService.getBoard(boardId,false);//수정 시 조회수 증가 방지
+        model.addAttribute("board",board);
+        model.addAttribute("loginInfo",loginInfo);
+        return "updateform";
+    }
+    @PostMapping("/update")
+    public String update(
+            @RequestParam("boardId") int boardId,
+            @RequestParam("title") String title,
+            @RequestParam("content") String content,
+            HttpSession session
+    ){
+        LoginInfo loginInfo=(LoginInfo) session.getAttribute("loginInfo");
+        if(loginInfo ==null){//세션에 로그인 정보가 없으면 /loginform으로 리다이렉트
+            return "redirect:/loginform";
+        }
+        //boardId에 해당하는 글의 제목과 내용을 수정한다.
+        //글쓴이만 수정가능
+        Board board=boardService.getBoard(boardId,false);
+        if(board.getUserId() !=loginInfo.getUserId()){
+            return "redirect:/board?boardId="+boardId; //글보기로 이동
+        }
+        boardService.updateBoard(boardId,title,content);
+        return "redirect:/board?boardId="+boardId; //수정된 글로 리다이렉트.
     }
 }

@@ -75,4 +75,14 @@ public class BoardDao {
         String sql="delete from board where board_id=:boardId";
         jdbcTemplate.update(sql,Map.of("boardId",boardId));
     }
+
+    public void updateBoard(int boardId, String title, String content) {
+        String sql="update board set title=:title,content=:content where board_id=:boardId ";
+        Board board=new Board();
+        board.setBoardId(boardId);
+        board.setContent(content);
+        board.setTitle(title);
+        SqlParameterSource params=new BeanPropertySqlParameterSource(board);
+        jdbcTemplate.update(sql,params);
+    }
 }

@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 //트랜젝션 단위로 실행될 메소드를 선언하고 있는 인터페이스
 //spring이 관리해주는 bean
 //dao를 사용한다.
@@ -37,5 +39,10 @@ public class UserService {
     @Transactional
     public User getUser(String email){
         return userDao.getUser(email);
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getRoles(int userId) {
+        return userDao.getRoles(userId);
     }
 }
